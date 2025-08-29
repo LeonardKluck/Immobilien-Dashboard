@@ -1,8 +1,9 @@
 import streamlit as st
 import pandas as pd
+import matplotlib.pyplot as plt
 
 st.set_page_config(page_title="Immobilien KPI Vergleich", layout="wide")
-st.title("🏠 Immobilien KPI Dashboard – Objektvergleich A vs. B")
+st.title("🏠 Immobilien KPI Dashboard – Objektvergleich")
 
 # --- KPI Berechnung ---
 def calc_kpis(name, kaufpreis, miete, flaeche, nk_rate, makler_rate, ek_quote, annuitaet, opex, capex):
@@ -37,73 +38,96 @@ def calc_kpis(name, kaufpreis, miete, flaeche, nk_rate, makler_rate, ek_quote, a
     }
 
 # --- Eingaben ---
-col1, col2 = st.columns(2)
+with st.expander("📌 Parameter Objekt A", expanded=True):
+    name_a = st.text_input("Name Objekt A", value="Objekt A")
+    kp_a = st.number_input("Kaufpreis (€)", value=700000, step=10000, key="kp_a")
+    miete_a = st.number_input("Jahresmiete (€)", value=55000, step=1000, key="miete_a")
+    flaeche_a = st.number_input("Wohnfläche (m²)", value=300, step=10, key="flaeche_a")
+    nk_rate_a = st.number_input("Nebenkosten (%)", value=12.0, step=0.1, key="nk_a") / 100
+    makler_a = st.number_input("Maklercourtage (%)", value=3.57, step=0.1, key="makler_a") / 100
+    ek_a = st.number_input("Eigenkapitalquote (%)", value=10.0, step=1.0, key="ek_a") / 100
+    ann_a = st.number_input("Annuität (%)", value=5.5, step=0.1, key="ann_a") / 100
+    opex_a = st.number_input("Opex (€/m²)", value=15, step=1, key="opex_a")
+    capex_a = st.number_input("CapEx (€/m²)", value=10, step=1, key="capex_a")
 
-with col1:
-    st.subheader("📌 Objekt A")
-    kp_a = st.number_input("Kaufpreis A (€)", value=700000, step=10000)
-    miete_a = st.number_input("Jahresmiete A (€)", value=55000, step=1000)
-    flaeche_a = st.number_input("Wohnfläche A (m²)", value=300, step=10)
-    nk_rate_a = st.slider("Nebenkosten A (%)", 0.05, 0.15, 0.12, step=0.01)
-    makler_a = st.slider("Maklercourtage A (%)", 0.0, 0.05, 0.0357, step=0.005)
-    ek_a = st.slider("Eigenkapitalquote A", 0.0, 1.0, 0.10, step=0.01)
-    ann_a = st.slider("Annuität A (Zins+Tilgung)", 0.01, 0.10, 0.055, step=0.005)
-    opex_a = st.number_input("Opex A (€/m²)", value=15, step=1)
-    capex_a = st.number_input("CapEx A (€/m²)", value=10, step=1)
-
-with col2:
-    st.subheader("📌 Objekt B")
-    kp_b = st.number_input("Kaufpreis B (€)", value=850000, step=10000)
-    miete_b = st.number_input("Jahresmiete B (€)", value=60000, step=1000)
-    flaeche_b = st.number_input("Wohnfläche B (m²)", value=400, step=10)
-    nk_rate_b = st.slider("Nebenkosten B (%)", 0.05, 0.15, 0.12, step=0.01)
-    makler_b = st.slider("Maklercourtage B (%)", 0.0, 0.05, 0.0357, step=0.005)
-    ek_b = st.slider("Eigenkapitalquote B", 0.0, 1.0, 0.10, step=0.01)
-    ann_b = st.slider("Annuität B (Zins+Tilgung)", 0.01, 0.10, 0.055, step=0.005)
-    opex_b = st.number_input("Opex B (€/m²)", value=15, step=1)
-    capex_b = st.number_input("CapEx B (€/m²)", value=10, step=1)
+with st.expander("📌 Parameter Objekt B", expanded=True):
+    name_b = st.text_input("Name Objekt B", value="Objekt B")
+    kp_b = st.number_input("Kaufpreis (€)", value=850000, step=10000, key="kp_b")
+    miete_b = st.number_input("Jahresmiete (€)", value=60000, step=1000, key="miete_b")
+    flaeche_b = st.number_input("Wohnfläche (m²)", value=400, step=10, key="flaeche_b")
+    nk_rate_b = st.number_input("Nebenkosten (%)", value=12.0, step=0.1, key="nk_b") / 100
+    makler_b = st.number_input("Maklercourtage (%)", value=3.57, step=0.1, key="makler_b") / 100
+    ek_b = st.number_input("Eigenkapitalquote (%)", value=10.0, step=1.0, key="ek_b") / 100
+    ann_b = st.number_input("Annuität (%)", value=5.5, step=0.1, key="ann_b") / 100
+    opex_b = st.number_input("Opex (€/m²)", value=15, step=1, key="opex_b")
+    capex_b = st.number_input("CapEx (€/m²)", value=10, step=1, key="capex_b")
 
 # --- Berechnung ---
-kpis_a = calc_kpis("Objekt A", kp_a, miete_a, flaeche_a, nk_rate_a, makler_a, ek_a, ann_a, opex_a, capex_a)
-kpis_b = calc_kpis("Objekt B", kp_b, miete_b, flaeche_b, nk_rate_b, makler_b, ek_b, ann_b, opex_b, capex_b)
+kpis_a = calc_kpis(name_a, kp_a, miete_a, flaeche_a, nk_rate_a, makler_a, ek_a, ann_a, opex_a, capex_a)
+kpis_b = calc_kpis(name_b, kp_b, miete_b, flaeche_b, nk_rate_b, makler_b, ek_b, ann_b, opex_b, capex_b)
 
 df = pd.DataFrame([kpis_a, kpis_b]).set_index("Objekt")
-df["Delta (A-B)"] = df.loc["Objekt A"] - df.loc["Objekt B"]
+df["Delta (A-B)"] = df.iloc[0] - df.iloc[1]
 
-# --- Ampellogik für Karten ---
-def delta_style(val, metric_type="higher"):
-    if metric_type == "higher":
-        return "🟢 besser" if val > 0 else ("🔴 schlechter" if val < 0 else "⚪ gleich")
-    else:  # lower is better
-        return "🟢 besser" if val < 0 else ("🔴 schlechter" if val > 0 else "⚪ gleich")
+# --- KPI Cards für Mobile ---
+st.subheader("📊 KPI Vergleich (Kartenansicht)")
 
-# --- KPI-Karten ---
-st.subheader("🔑 Wichtigste Kennzahlen")
-kcol1, kcol2, kcol3 = st.columns(3)
+for metric in ["Gesamtkosten (€)", "Eigenkapital (€)", "Fremdkapital (€)", "NOI (€)", 
+               "Cap Rate (%)", "DSCR", "CoC Rendite (%)", "Nettomietrendite (%)"]:
+    col1, col2, col3 = st.columns([1,1,1])
+    val_a = df.loc[name_a, metric]
+    val_b = df.loc[name_b, metric]
+    delta = val_a - val_b
 
-delta_cap = df.loc["Objekt A", "Cap Rate (%)"] - df.loc["Objekt B", "Cap Rate (%)"]
-delta_dscr = df.loc["Objekt A", "DSCR"] - df.loc["Objekt B", "DSCR"]
-delta_coc = df.loc["Objekt A", "CoC Rendite (%)"] - df.loc["Objekt B", "CoC Rendite (%)"]
+    # Formatierung
+    if "€" in metric:
+        val_a_fmt = f"{val_a:,.0f} €"
+        val_b_fmt = f"{val_b:,.0f} €"
+        delta_fmt = f"{delta:,.0f} €"
+    elif "%" in metric:
+        val_a_fmt = f"{val_a:.2f} %"
+        val_b_fmt = f"{val_b:.2f} %"
+        delta_fmt = f"{delta:.2f} %"
+    else:
+        val_a_fmt = f"{val_a:.2f}"
+        val_b_fmt = f"{val_b:.2f}"
+        delta_fmt = f"{delta:.2f}"
 
-kcol1.metric("Cap Rate A", f"{df.loc['Objekt A', 'Cap Rate (%)']:.2f} %", delta_style(delta_cap, "higher"))
-kcol2.metric("DSCR A", f"{df.loc['Objekt A', 'DSCR']:.2f}", delta_style(delta_dscr, "higher"))
-kcol3.metric("CoC Rendite A", f"{df.loc['Objekt A', 'CoC Rendite (%)']:.2f} %", delta_style(delta_coc, "higher"))
+    # Ampelfarben
+    better_high = ["NOI (€)", "Cap Rate (%)", "DSCR", "CoC Rendite (%)", "Nettomietrendite (%)"]
+    if metric in better_high:
+        delta_symbol = "🟢" if delta > 0 else ("🔴" if delta < 0 else "⚪")
+    else:
+        delta_symbol = "🟢" if delta < 0 else ("🔴" if delta > 0 else "⚪")
 
-# --- Vergleichstabelle ---
-styled_df = df.style.format({
-    "Gesamtkosten (€)": "{:,.0f} €",
-    "Eigenkapital (€)": "{:,.0f} €",
-    "Fremdkapital (€)": "{:,.0f} €",
-    "NOI (€)": "{:,.0f} €",
-    "Cap Rate (%)": "{:.2f} %",
-    "DSCR": "{:.2f}",
-    "CoC Rendite (%)": "{:.2f} %",
-    "Nettomietrendite (%)": "{:.2f} %",
-    "Delta (A-B)": "{:.2f}"
-})
+    col1.metric(f"{metric} – {name_a}", val_a_fmt)
+    col2.metric(f"{metric} – {name_b}", val_b_fmt)
+    col3.metric("Delta (A-B)", f"{delta_fmt} {delta_symbol}")
 
-st.subheader("📊 KPI Vergleich – Objekt A vs. Objekt B")
-st.table(styled_df)
+# --- Radar Chart ---
+st.subheader("📈 Grafischer Vergleich (Radar-Chart)")
+metrics = ["Cap Rate (%)", "DSCR", "CoC Rendite (%)", "Nettomietrendite (%)"]
+
+values_a = [df.loc[name_a, m] for m in metrics]
+values_b = [df.loc[name_b, m] for m in metrics]
+
+angles = list(range(len(metrics)))
+angles += [angles[0]]
+
+values_a += [values_a[0]]
+values_b += [values_b[0]]
+
+fig, ax = plt.subplots(figsize=(5,5), subplot_kw=dict(polar=True))
+ax.plot(angles, values_a, label=name_a, linewidth=2)
+ax.fill(angles, values_a, alpha=0.25)
+ax.plot(angles, values_b, label=name_b, linewidth=2)
+ax.fill(angles, values_b, alpha=0.25)
+
+ax.set_xticks(angles[:-1])
+ax.set_xticklabels(metrics, fontsize=10)
+ax.legend(loc="upper right", bbox_to_anchor=(1.2, 1.05))
+
+st.pyplot(fig)
 
 # --- Definitionen ---
 with st.expander("ℹ️ Definitionen der Kennzahlen"):
